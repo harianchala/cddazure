@@ -1,0 +1,47 @@
+# HTML
+# Archive your static HTML project and save it with the build record.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# Ensure the repository is checked out
+- checkout: self
+  persistCredentials: true
+  fetchDepth: 0
+
+# Install Python (required for running a simple HTTP server)
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+    addToPath: true
+  displayName: 'Install Python'
+
+# Create first.html file (if not already in your repository)
+- script: |
+    echo "<!DOCTYPE html>" > first.html
+    echo "<html>" >> first.html
+    echo "<head>" >> first.html
+    echo "    <meta charset='UTF-8'>" >> first.html
+    echo "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" >> first.html
+    echo "    <title>My First HTML Page</title>" >> first.html
+    echo "</head>" >> first.html
+    echo "<body>" >> first.html
+    echo "    <h1>Welcome to My Webpage</h1>" >> first.html
+    echo "    <p>This is a simple HTML page served using Python's HTTP server.</p>" >> first.html
+    echo "    <button onclick=\"alert('Hello, welcome to my webpage!')\">Click Me</button>" >> first.html
+    echo "</body>" >> first.html
+    echo "</html>" >> first.html
+  displayName: 'Create first.html File'
+
+# Serve the HTML file using Python's HTTP server
+- script: |
+    nohup python3 -m http.server 8080 &
+    sleep 5
+    curl -I http://localhost:8080/first.html
+  displayName: 'Serve and Access first.html File'
